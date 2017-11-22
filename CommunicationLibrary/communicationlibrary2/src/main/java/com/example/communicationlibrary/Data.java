@@ -1,45 +1,55 @@
 package com.example.communicationlibrary;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Klasa reprezentująca dane przesyłane pomiędzy urządzeniem a telefonem
+ * @author mateuszwojciechowski
  */
 
 public class Data {
-    private String type;
+    private Date timestamp;
     private float acceleration;
 
-    //Constants
-    public static final String TYPE_DATA = "acc";
-    public static final String TYPE_CONFIGURATION = "config";
-
+    /**
+     * Konstruktor domyślny klasy, ustawia dane na 0
+     */
     public Data() {
-        type = null;
+        timestamp = new Date();
         acceleration = 0;
     }
 
-    public Data(String type) {
-        switch(type) {
-            case Data.TYPE_DATA:
-                type = Data.TYPE_DATA;
-                break;
-            case Data.TYPE_CONFIGURATION:
-                type = Data.TYPE_CONFIGURATION;
-                break;
-            default:
-                type = null;
-        }
+    /**
+     * Konstruktor klasy wykorzystujący otrzymaną wiadomość z urządzenia
+     * @param cmd wiadomość otrzymana z urządzenia
+     */
+    public Data(String cmd) {
+        timestamp = new Date();
+        acceleration = Float.valueOf(cmd);
     }
 
-    public Data(String type, String data) {
-        switch(type) {
-            case Data.TYPE_DATA:
-                type = Data.TYPE_DATA;
-                break;
-            case Data.TYPE_CONFIGURATION:
-                type = Data.TYPE_CONFIGURATION;
-                break;
-            default:
-                type = null;
-        }
+    /**
+     * Funkcja zwracająca odczyt przyspieszenia
+     * @return przyspieszenie
+     */
+    public float getAcceleration() {
+        return acceleration;
+    }
+
+    /**
+     * Funkcja zwracająca czas zdarzenia
+     * @return czas zdarzenia
+     */
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Funkcja zwracająca czas zdarzenia w postaci String
+     * @return czas zdarzenia
+     */
+    public String getTimestampString() {
+        return new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS ").format(timestamp);
     }
 }

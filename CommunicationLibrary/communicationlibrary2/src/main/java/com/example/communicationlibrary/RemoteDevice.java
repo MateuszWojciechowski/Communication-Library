@@ -11,6 +11,8 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.SystemClock;
 
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.UUID;
 
 /**
@@ -27,6 +29,8 @@ public class RemoteDevice {
     private BluetoothGattService mBluetoothGattService;
     private BluetoothGattCharacteristic mBluetoothGattCharacteristic;
     private Context mContext;
+    private LinkedList<Data> data;
+    //adres modułu z inzynierki
     private static final String DEVICE_ADDRESS = "88:4A:EA:8B:8B:CD";
     private static final UUID SERVICE_UUID = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
     private static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
@@ -51,6 +55,7 @@ public class RemoteDevice {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             mBluetoothGattService = gatt.getService(SERVICE_UUID);
             mBluetoothGattCharacteristic = mBluetoothGattService.getCharacteristic(CHARACTERISTIC_UUID);
+            mBluetoothGatt.setCharacteristicNotification(mBluetoothGattCharacteristic, true);
         }
 
         @Override
@@ -66,6 +71,10 @@ public class RemoteDevice {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
+            data.add(new Data(characteristic.getStringValue(0)));
+            if (data.size() >= 100) {
+                data.removeFirst();
+            }
         }
     };
 
@@ -73,12 +82,14 @@ public class RemoteDevice {
      * Konstruktor klasy RemoteDevice
      * @param context kontekst aplikacji
      * @param manager instancja klasy BluetoothManager
+     * @param macAddress adres MAC urządzenia BLE
      */
-    public RemoteDevice(Context context, BluetoothManager manager) {
+    public RemoteDevice(Context context, BluetoothManager manager, String macAddress) {
         mBluetoothManager = manager;
         mContext = context;
         mBluetoothAdapter = manager.getAdapter();
-        mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(DEVICE_ADDRESS);
+        mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(macAddress);
+        data = new LinkedList<>();
     }
 
     /**
@@ -100,5 +111,21 @@ public class RemoteDevice {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
         }
+    }
+
+    /**
+     * Funkcja zwracająca listę otrzymanych odczytów z czujnika
+     * @return lista odczytów
+     */
+    public LinkedList<Data> getData() {
+        return data;
+    }
+
+    /**
+     * Funkcja zwracająca ostatni otrzymany odczyt z czujnika
+     * @return ostatni odczyt
+     */
+    public Data getLastData() {
+        return data.getLast();
     }
 }
